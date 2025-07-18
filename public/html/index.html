@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vibecode Blog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hamburger.css">
+  <style>
+    #logoutBtn {
+      display: none;
+      position: absolute;
+      right: 20px;
+      top: 18px;
+      padding: 6px 16px;
+      background: #f44336;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 1em;
+      z-index: 10;
+    }
+    .nav-container {
+      position: relative;
+    }
+    #userWelcome {
+      margin-left: 16px;
+      font-weight: bold;
+    }
+    #posts {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .post {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px #191a2364;
+      padding: 28px 24px 20px 24px;
+      position: relative;
+      transition: box-shadow 0.13s;
+    }
+    .post:hover {
+      box-shadow: 0 4px 18px #191a2388;
+    }
+    .post h2 {
+      margin-top: 0;
+      margin-bottom: 7px;
+      font-size: 1.25em;
+      color: #232d3b;
+      font-weight: 700;
+    }
+    .post .meta {
+      color: #4a7cf7;
+      font-size: 0.98em;
+      margin-bottom: 13px;
+      display: block;
+    }
+    .post p {
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: #232d3b;
+      font-size: 1.08em;
+      line-height: 1.6;
+    }
+    .post small {
+      color: #888da8;
+      font-size: 0.97em;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">Vibecode Blog</a>
+      </div>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+      <label for="nav-toggle" class="nav-toggle-label">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="login.html" id="loginLink">Login</a>
+        <a href="register.html" id="registerLink">Register</a>
+        <a href="editor.html" id="editorLink">New Post</a>
+      </div>
+      <span id="userWelcome"></span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </nav>
+  <main>
+    <h1>Blog Posts</h1>
+    <div id="posts">
+      <!-- Blog posts will load here -->
+    </div>
+  </main>
+  <script>
+    // --- User session check and nav update ---
+    function updateNavForUser(username) {
+      const userWelcome = document.getElementById('userWelcome');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const loginLink = document.getElementById('loginLink');
+      const registerLink = document.getElementById('registerLink');
+      const editorLink = document.getElementById('editorLink');
+
+      if(username) {
+        userWelcome.textContent = 'Welcome ' + username;
+        logoutBtn.style.display = '';
+        loginLink.style.display = 'none';
+        registerLink.style.display = 'none';
+        editorLink.style.display = '';
+      } else {
+        userWelcome.textContent = '';
+        logoutBtn.style.display = 'none';
+        loginLink.style.display = '';
+        registerLink.style.display = '';
+        editorLink.style.display = 'none';
+      }
+    }
+
+    // Check session on page load
+    fetch('/api/check_session', {credentials: 'include'})
+      .then(res => res.json())
+      .then(data => {
+        if(data.logged_in) {
+          updateNavForUser(data.username);
+        } else {
+          updateNavForUser(null);
+        }
+      });
+
+    // Logout button handler
+    document.getElementById('logoutBtn').onclick = function() {
+      fetch('/api/logout', {method: 'POST', credentials: 'include'})
+        .then(res => res.json())
+        .then(() => {
+          updateNavForUser(null);
+          location.reload();
+        });
+    };
+
+    // Optionally, hide New Post if not logged in
+    document.getElementById('editorLink').style.display = 'none';
+
+    // --- Load blog posts from backend and render ---
+    async function loadPosts() {
+      const postsDiv = document.getElementById('posts');
+      postsDiv.innerHTML = '<div style="color:#888;text-align:center;">Loading posts...</div>';
+      try {
+        const res = await fetch('http://localhost:5000/api/posts', { credentials: 'include' });
+        const data = await res.json();
+        if (!Array.isArray(data.posts) || data.posts.length === 0) {
+          postsDiv.innerHTML = '<div style="color:#888;text-align:center;">No posts yet. Be the first to post!</div>';
+          return;
+        }
+        postsDiv.innerHTML = '';
+        data.posts.forEach(post => {
+          // Basic XSS protection: escape HTML in title/author/content
+          function escape(str) {
+            return String(str)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+          }
+          const postDiv = document.createElement('div');
+          postDiv.className = 'post';
+          postDiv.innerHTML = `
+            <h2>${escape(post.title)}</h2>
+            <span class="meta">by ${escape(post.author || 'anonymous')} on ${escape(new Date(post.created_at).toLocaleDateString())}</span>
+            <p>${escape(post.content)}</p>
+          `;
+          postsDiv.appendChild(postDiv);
+        });
+      } catch (err) {
+        postsDiv.innerHTML = '<div style="color:#f44336;text-align:center;">Failed to load posts.</div>';
+      }
+    }
+
+    // Load posts on page load
+    loadPosts();
+  </script>
+</body>
+</html>

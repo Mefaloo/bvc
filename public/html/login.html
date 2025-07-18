@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Vibecode Blog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hamburger.css">
+  <style>
+    main {
+      max-width: 400px;
+      margin: 56px auto 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px #191a2364;
+      padding: 36px 24px 28px 24px;
+    }
+    h1 {
+      font-size: 1.7em;
+      margin-bottom: 22px;
+      text-align: center;
+      font-weight: 600;
+      color: #232d3b;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .login-input {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 5px;
+      border: 1px solid #ccd0d5;
+      font-size: 1em;
+      box-sizing: border-box;
+      margin-bottom: 7px;
+      transition: border-color 0.18s;
+      background: #f6f7fa;
+      color: #232d3b;
+    }
+    .login-input:focus {
+      border-color: #4a7cf7;
+      outline: none;
+      background: #f0f6ff;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 11px 0;
+      background: #4a7cf7;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 7px;
+      transition: background 0.18s;
+    }
+    .login-btn:active,
+    .login-btn:hover {
+      background: #315dc3;
+    }
+    #loginError {
+      margin-top: 13px;
+      color: #f44336;
+      font-size: 1em;
+      min-height: 1.3em;
+      text-align: center;
+    }
+    .login-links {
+      margin-top: 18px;
+      text-align: center;
+    }
+    .login-links a {
+      color: #4a7cf7;
+      text-decoration: none;
+      margin: 0 2px;
+      transition: color 0.18s;
+    }
+    .login-links a:hover {
+      color: #315dc3;
+      text-decoration: underline;
+    }
+    @media (max-width: 500px) {
+      main {
+        padding: 18px 5vw 18px 5vw;
+      }
+    }
+    /* Carry over nav-container & logoutBtn styles for consistency */
+    #logoutBtn {
+      display: none;
+      position: absolute;
+      right: 20px;
+      top: 18px;
+      padding: 6px 16px;
+      background: #f44336;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 1em;
+      z-index: 10;
+    }
+    .nav-container {
+      position: relative;
+    }
+    #userWelcome {
+      margin-left: 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">Vibecode Blog</a>
+      </div>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+      <label for="nav-toggle" class="nav-toggle-label">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="login.html" id="loginLink">Login</a>
+        <a href="register.html" id="registerLink">Register</a>
+        <a href="editor.html" id="editorLink">New Post</a>
+      </div>
+      <span id="userWelcome"></span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </nav>
+  <main>
+    <h1>Login</h1>
+    <form id="loginForm" autocomplete="on">
+      <div class="form-group">
+        <input class="login-input" name="username" required placeholder="Username or Email" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <input class="login-input" name="password" required type="password" placeholder="Password" autocomplete="current-password">
+      </div>
+      <button class="login-btn" type="submit">Login</button>
+      <div id="loginError"></div>
+    </form>
+    <div class="login-links">
+      Don't have an account? <a href="register.html">Register</a>
+      <br>
+      <a href="index.html">Back to Home</a>
+    </div>
+  </main>
+  <script>
+    // --- User session check and nav update (matches index.html) ---
+    function updateNavForUser(username) {
+      const userWelcome = document.getElementById('userWelcome');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const loginLink = document.getElementById('loginLink');
+      const registerLink = document.getElementById('registerLink');
+      const editorLink = document.getElementById('editorLink');
+
+      if(username) {
+        userWelcome.textContent = 'Welcome ' + username;
+        logoutBtn.style.display = '';
+        loginLink.style.display = 'none';
+        registerLink.style.display = 'none';
+        editorLink.style.display = '';
+      } else {
+        userWelcome.textContent = '';
+        logoutBtn.style.display = 'none';
+        loginLink.style.display = '';
+        registerLink.style.display = '';
+        editorLink.style.display = 'none';
+      }
+    }
+
+    // Check session on page load
+    fetch('/api/check_session', {credentials: 'include'})
+      .then(res => res.json())
+      .then(data => {
+        if(data.logged_in) {
+          updateNavForUser(data.username);
+        } else {
+          updateNavForUser(null);
+        }
+      });
+
+    // Logout button handler
+    document.getElementById('logoutBtn').onclick = function() {
+      fetch('/api/logout', {method: 'POST', credentials: 'include'})
+        .then(res => res.json())
+        .then(() => {
+          updateNavForUser(null);
+          location.reload();
+        });
+    };
+
+    document.getElementById('editorLink').style.display = 'none';
+
+    // Login form logic (with errors)
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const username = this.username.value;
+      const password = this.password.value;
+      const loginError = document.getElementById('loginError');
+      loginError.textContent = '';
+      const res = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        window.location.href = 'index.html';
+      } else {
+        loginError.textContent = data.error || "Login failed.";
+      }
+    };
+  </script>
+</body>
+</html>

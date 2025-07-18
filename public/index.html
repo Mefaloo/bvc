@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vibecode Blog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hamburger.css">
+  <style>
+    #logoutBtn {
+      display: none;
+      position: absolute;
+      right: 20px;
+      top: 18px;
+      padding: 6px 16px;
+      background: #f44336;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 1em;
+      z-index: 10;
+    }
+    .nav-container {
+      position: relative;
+    }
+    #userWelcome {
+      margin-left: 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">Vibecode Blog</a>
+      </div>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+      <label for="nav-toggle" class="nav-toggle-label">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="login.html" id="loginLink">Login</a>
+        <a href="register.html" id="registerLink">Register</a>
+        <a href="editor.html" id="editorLink">New Post</a>
+      </div>
+      <span id="userWelcome"></span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </nav>
+  <main>
+    <h1>Blog Posts</h1>
+    <div id="posts">
+      <!-- Blog posts will load here -->
+      <div class="post">
+        <h2>Welcome to Vibecode Blog</h2>
+        <p>This is a sample post. Replace this with content loaded from your backend.</p>
+        <small>by admin on 2025-07-18</small>
+      </div>
+    </div>
+  </main>
+  <script>
+    // --- User session check and nav update ---
+    function updateNavForUser(username) {
+      const userWelcome = document.getElementById('userWelcome');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const loginLink = document.getElementById('loginLink');
+      const registerLink = document.getElementById('registerLink');
+      const editorLink = document.getElementById('editorLink');
+
+      if(username) {
+        userWelcome.textContent = 'Welcome ' + username;
+        logoutBtn.style.display = '';
+        loginLink.style.display = 'none';
+        registerLink.style.display = 'none';
+        editorLink.style.display = '';
+      } else {
+        userWelcome.textContent = '';
+        logoutBtn.style.display = 'none';
+        loginLink.style.display = '';
+        registerLink.style.display = '';
+        editorLink.style.display = 'none';
+      }
+    }
+
+    // Check session on page load
+    fetch('/api/check_session', {credentials: 'include'})
+      .then(res => res.json())
+      .then(data => {
+        if(data.logged_in) {
+          updateNavForUser(data.username);
+        } else {
+          updateNavForUser(null);
+        }
+      });
+
+    // Logout button handler
+    document.getElementById('logoutBtn').onclick = function() {
+      fetch('/api/logout', {method: 'POST', credentials: 'include'})
+        .then(res => res.json())
+        .then(() => {
+          updateNavForUser(null);
+          // Optionally reload to reset UI
+          location.reload();
+        });
+    };
+
+    // Optionally, hide New Post if not logged in
+    document.getElementById('editorLink').style.display = 'none';
+  </script>
+</body>
+</html>

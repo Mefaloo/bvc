@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Vibecode Blog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hamburger.css">
+</head>
+<body>
+  <nav>
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">Vibecode Blog</a>
+      </div>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+      <label for="nav-toggle" class="nav-toggle-label">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="login.html" class="active">Login</a>
+        <a href="register.html">Register</a>
+        <a href="editor.html">New Post</a>
+      </div>
+      <span id="userWelcome"></span>
+    </div>
+  </nav>
+  <main>
+    <h1>Login</h1>
+    <form id="loginForm">
+      <label>Email or Username:<br>
+        <input type="text" name="username" required>
+      </label>
+      <label>Password:<br>
+        <input type="password" name="password" required>
+      </label>
+      <button type="submit">Login</button>
+      <div id="loginError" class="error"></div>
+    </form>
+  </main>
+  <script>
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const username = this.username.value;
+      const password = this.password.value;
+      const loginError = document.getElementById('loginError');
+      loginError.textContent = '';
+
+      try {
+        const response = await fetch('http://localhost:5000/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+          // Network-level error (e.g. server not running)
+          loginError.textContent = "Cannot connect to backend. Please try again later.";
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          // You can adjust what happens on successful login
+          // For now, we'll just redirect to the homepage
+          window.location.href = 'index.html';
+        } else {
+          // Show error message from backend or a fallback
+          loginError.textContent = data.error || "Invalid login credentials.";
+        }
+      } catch (err) {
+        loginError.textContent = "Error communicating with server.";
+      }
+    };
+  </script>
+</body>
+</html>

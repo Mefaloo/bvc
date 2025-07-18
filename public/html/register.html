@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Vibecode Blog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hamburger.css">
+</head>
+<body>
+  <nav>
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">Vibecode Blog</a>
+      </div>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+      <label for="nav-toggle" class="nav-toggle-label">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="login.html">Login</a>
+        <a href="register.html" class="active">Register</a>
+        <a href="editor.html">New Post</a>
+      </div>
+      <span id="userWelcome"></span>
+    </div>
+  </nav>
+  <main>
+    <h1>Register</h1>
+    <form id="registerForm">
+      <label>Username:<br>
+        <input type="text" name="username" required>
+      </label>
+      <label>Email:<br>
+        <input type="email" name="email" required>
+      </label>
+      <label>Password:<br>
+        <input type="password" name="password" required>
+      </label>
+      <button type="submit">Register</button>
+      <div id="registerError" class="error"></div>
+      <div id="registerSuccess" class="success"></div>
+    </form>
+  </main>
+  <script>
+    document.getElementById('registerForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const username = this.username.value.trim();
+      const email = this.email.value.trim();
+      const password = this.password.value;
+      const registerError = document.getElementById('registerError');
+      const registerSuccess = document.getElementById('registerSuccess');
+      registerError.textContent = '';
+      registerSuccess.textContent = '';
+
+      try {
+        const response = await fetch('http://localhost:5000/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          registerSuccess.textContent = "Registration successful! You can now log in.";
+          // Optionally, redirect to login page after a short delay
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1200);
+        } else {
+          registerError.textContent = data.error || "Registration failed. Please try again.";
+        }
+      } catch (err) {
+        registerError.textContent = "Cannot connect to backend. Please try again later.";
+      }
+    };
+  </script>
+</body>
+</html>

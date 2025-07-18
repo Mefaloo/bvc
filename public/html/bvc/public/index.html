@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vibecode Blog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hamburger.css">
+</head>
+<body>
+  <nav>
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">Vibecode Blog</a>
+      </div>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+      <label for="nav-toggle" class="nav-toggle-label">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="login.html" id="loginLink">Login</a>
+        <a href="register.html" id="registerLink">Register</a>
+        <a href="editor.html" id="editorLink">New Post</a>
+      </div>
+      <span id="userWelcome"></span>
+    </div>
+  </nav>
+  <main>
+    <h1>Blog Posts</h1>
+    <div id="posts">
+      <!-- Blog posts will load here -->
+      <div class="post">
+        <h2>Welcome to Vibecode Blog</h2>
+        <p>This is a sample post. Replace this with content loaded from your backend.</p>
+        <small>by admin on 2025-07-18</small>
+      </div>
+    </div>
+  </main>
+  <script>
+    // Placeholder: replace with AJAX to load posts from your backend
+    // Optionally, update nav based on login status (localStorage or session)
+  </script>
+</body>
+</html>

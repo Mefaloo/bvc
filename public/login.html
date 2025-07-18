@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Vibecode Blog</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #f6f7fa;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    .login-container {
+      max-width: 360px;
+      margin: 60px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+      padding: 36px 28px 24px 28px;
+      position: relative;
+    }
+    .login-container h1 {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 24px;
+      letter-spacing: 0.02em;
+      color: #232d3b;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .login-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 6px;
+      border: 1px solid #d1d8e0;
+      font-size: 1rem;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      transition: border-color 0.2s;
+    }
+    .login-input:focus {
+      border-color: #4a7cf7;
+      outline: none;
+      background: #f0f6ff;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 12px 0;
+      background: #4a7cf7;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.18s;
+    }
+    .login-btn:active,
+    .login-btn:hover {
+      background: #315dc3;
+    }
+    #loginError {
+      margin-top: 14px;
+      color: #d32f2f;
+      font-size: 1rem;
+      min-height: 1.4em;
+      text-align: center;
+    }
+    .login-links {
+      margin-top: 18px;
+      text-align: center;
+    }
+    .login-links a {
+      color: #4a7cf7;
+      text-decoration: none;
+      margin: 0 2px;
+      transition: color 0.18s;
+    }
+    .login-links a:hover {
+      color: #315dc3;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>Login to Vibecode</h1>
+    <form id="loginForm" autocomplete="on">
+      <div class="form-group">
+        <input class="login-input" name="username" required placeholder="Username or Email" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <input class="login-input" name="password" required type="password" placeholder="Password" autocomplete="current-password">
+      </div>
+      <button class="login-btn" type="submit">Login</button>
+      <div id="loginError"></div>
+    </form>
+    <div class="login-links">
+      Don't have an account? <a href="register.html">Register</a>
+      <br>
+      <a href="index.html">Back to Home</a>
+    </div>
+  </div>
+  <script>
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const username = this.username.value;
+      const password = this.password.value;
+      const loginError = document.getElementById('loginError');
+      loginError.textContent = '';
+      const res = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        window.location.href = 'index.html';
+      } else {
+        loginError.textContent = data.error || "Login failed.";
+      }
+    };
+  </script>
+</body>
+</html>
